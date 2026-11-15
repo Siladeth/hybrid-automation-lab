@@ -1,18 +1,17 @@
-@"
 # Hybrid Infrastructure Automation & SAML 2.0 SSO Lab
 
 Automated deployment, configuration management, and security hardening of a multi-tier web architecture (Apache + PostgreSQL) orchestrated via **Ansible** and **Rundeck**, featuring federated Cloud identity authentication with **Microsoft Entra ID (SAML 2.0)**.
 
 ## Architecture
 
-\`\`\`mermaid
+```mermaid
 flowchart LR
-    User[User / Browser] -->|1. HTTPS / SAML AuthnRequest| Web[web-node\n192.168.56.11\nApache + mod_auth_mellon]
-    Web <-->|2. SAML 2.0 Redirect & Assertion| Entra[Microsoft Entra ID\nCloud IdP]
-    Web -->|3. SQL Queries| DB[db-node\n192.168.56.12\nPostgreSQL]
-    Control[control-node\n192.168.56.10\nAnsible + Rundeck] -->|SSH / Playbooks| Web
+    User[User / Browser] -->|1. HTTPS / SAML AuthnRequest| Web[web-node<br/>192.168.56.11<br/>Apache + mod_auth_mellon]
+    Web <-->|2. SAML 2.0 Redirect & Assertion| Entra[Microsoft Entra ID<br/>Cloud IdP]
+    Web -->|3. SQL Queries| DB[db-node<br/>192.168.56.12<br/>PostgreSQL]
+    Control[control-node<br/>192.168.56.10<br/>Ansible + Rundeck] -->|SSH / Playbooks| Web
     Control -->|SSH / Playbooks| DB
-\`\`\`
+```
 
 ### Node Inventory (Vagrant / VirtualBox)
 
@@ -41,4 +40,3 @@ During the SAML 2.0 integration between Apache (`mod_auth_mellon`) and Microsoft
 In this local lab environment, **Rundeck** and **Ansible** are co-located on `control-node` to optimize memory footprint. In a multi-tenant SaaS production environment:
 * **Control Plane Isolation:** The orchestrator is decoupled into a centralized, containerized **Management Plane** (Docker / Kubernetes).
 * **GitOps Workflow:** Playbooks are never stored locally on execution nodes; each Rundeck job dynamically pulls version-controlled playbooks from Git and targets client environments via dynamic cloud inventories and hardened bastions.
-"@ | Out-File -FilePath README.md -Encoding utf8
