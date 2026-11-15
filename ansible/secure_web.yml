@@ -1,0 +1,44 @@
+---
+- name: Sécurisation SSL du serveur Web
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Générer un certificat SSL auto-signé
+      command: >
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048
+        -keyout /etc/ssl/private/apache-selfsigned.key
+        -out /etc/ssl/certs/apache-selfsigned.crt
+        -subj "/C=FR/ST=Paris/O=Lab/CN=192.168.56.11"
+      args:
+        creates: /etc/ssl/certs/apache-selfsigned.crt
+
+    - name: Activer le module SSL d'Apache
+      command: a2enmod ssl
+      args:
+        creates: /etc/apache2/mods-enabled/ssl.load
+
+    - name: Activer le site HTTPS par défaut
+      command: a2ensite default-ssl
+      args:
+        creates: /etc/apache2/sites-enabled/default-ssl.conf
+      notify: Redémarrer Apache
+
+    - name: Configurer Apache pour utiliser le bon certificat SSL
+      lineinfile:
+        path: /etc/apache2/sites-available/default-ssl.conf
+        regexp: '^\s*SSLCertificateFile'
+        line: '        SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt'
+      notify: Redémarrer Apache
+
+    - name: Configurer Apache pour utiliser la bonne clé SSL
+      lineinfile:
+        path: /etc/apache2/sites-available/default-ssl.conf
+        regexp: '^\s*SSLCertificateKeyFile'
+        line: '        SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key'
+      notify: Redémarrer Apache
+
+  handlers:
+    - name: Redémarrer Apache
+      service:
+        name: apache2
+        state: restarted

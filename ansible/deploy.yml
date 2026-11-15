@@ -1,0 +1,32 @@
+---
+- name: Déploiement du serveur Web
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Installer Apache2
+      apt:
+        name: apache2
+        state: present
+        update_cache: yes
+
+    - name: S'assurer qu'Apache est démarré et activé au boot
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+
+- name: Déploiement de la Base de Données
+  hosts: dbservers
+  become: yes
+  tasks:
+    - name: Installer PostgreSQL
+      apt:
+        name: postgresql
+        state: present
+        update_cache: yes
+
+    - name: S'assurer que PostgreSQL est démarré et activé au boot
+      service:
+        name: postgresql
+        state: started
+        enabled: yes
